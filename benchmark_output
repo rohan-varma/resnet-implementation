@@ -1,0 +1,33 @@
+Files already downloaded and verified
+Files already downloaded and verified
+Using benchmark resnet
+0
+loss: 2.3346822261810303, accuracy: 0.09375
+1
+loss: 2.2720158100128174, accuracy: 0.171875
+2
+loss: 2.2448201179504395, accuracy: 0.2265625
+3
+loss: 2.2426302433013916, accuracy: 0.1484375
+4
+loss: 2.2124433517456055, accuracy: 0.2109375
+0
+loss: 2.195897102355957, accuracy: 0.171875
+1
+loss: 2.1058573722839355, accuracy: 0.25
+2
+loss: 2.1229777336120605, accuracy: 0.1640625
+3
+loss: 2.058633327484131, accuracy: 0.2421875
+4
+loss: 2.067481517791748, accuracy: 0.203125
+0
+loss: 2.0370569229125977, accuracy: 0.2421875
+1
+loss: 2.0318057537078857, accuracy: 0.28125
+2
+loss: 1.9885191917419434, accuracy: 0.2734375
+3
+loss: 2.0166687965393066, accuracy: 0.2734375
+4
+loss: 1.8017878532409668, accuracy: 0.296875
