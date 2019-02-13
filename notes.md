@@ -1,5 +1,7 @@
 #### ResNet paper notes
 
+These are some notes that I took while reading the paper [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385), the paper that introduced modern ResNets.
+
 ##### 1. Introduction
 
 - Main motivation: very deep neural networks are harder to fit
@@ -8,7 +10,7 @@
 
   - Degredation problem is because it is difficult to fit very deep networks (despite batch normalization and He/Xavier initialization methods), they don't just overfit, they actually have worse training error
 
-    ![](images/verydeep_network.png)
+    ![](https://raw.githubusercontent.com/rohan-varma/resnet-implementation/master/images/verydeep_network.png)
 
 - Intuitively, deep networks should't be "harder" to fit. If there is a certain number of layers $N$ that achieve optimal accuracy on a dataset, then the layers after N could just learn the identity mapping (i.e. each layer computes their mapping as $H(x) = x$ where $H(x)$ is the mapping of the layer to be learned), and then the network will effectively have their final output at layer $N$
 
@@ -16,7 +18,7 @@
 
 - Authors introduce the idea of **residual learning** - instead of directly approximating the underlying mapping we want, $H(x)$, we instead learn a residual function $H(x) - x$. This is done by making the output of a stack of layers be $y = F(x) + x$, where $F(x)$ is the output of the layers (before the ReLU of the last layer) and then the original input $x$ is element-wise added:
 
-  ![](images/residual_learning_block.png)
+  ![](https://raw.githubusercontent.com/rohan-varma/resnet-implementation/master/images/residual_learning_block.png)
 
 - Therefore, if our underlying mapping is still $y = H(x)$ that we want to learn, then $F(x) = H(x) - x$ so that $y = F(x) + x = H(x) - x + x = H(x)$ .
 
@@ -51,7 +53,7 @@
 
   - The residual network is similar , but shortcut connectins are added every 2 layers, and the network looks as follows:
 
-    ![](images/resnet_layout.png)
+    ![](https://raw.githubusercontent.com/rohan-varma/resnet-implementation/master/images/resnet_layout.png)
 
   - Two options when dimensions don't map:
 
@@ -100,7 +102,7 @@
 
   - Exampe: in the following figure, a $256$ dimensional (256 channels) input is fed into a 1x1 which maps it to 64 channels, then a 3x3 which maps it to 64 channels, and then 1 x 1 that maps it back to the original dimensionality of 256 channels. 
 
-    ![](images/bottleneck.png)
+    ![](https://raw.githubusercontent.com/rohan-varma/resnet-implementation/master/images/bottleneck.png)
 
   - Parameter-free shortcuts here are particularly important, the time complexity and model size are doubled if identity shortcuts are replaced with projection
 
@@ -118,7 +120,7 @@
 - Number of filters are 16, 32, 64, respectively. Subsampling is done with conv layers of stride 2 instead of max/average pooling throughout the network (which is the traditional way of downsampling)
 - Global average pooling after all the conv layers, and then a 10-way fully connected layer + softmax at the end
 - Identity shortcuts used in all cases
-- Weight decay: $0.0001$, momentum of $0.9$, with He init, BN, and no dropout, with a batch size of $128$. 
+- Weight decay: $0.0001​$, momentum of $0.9​$, with He init, BN, and no dropout, with a batch size of $128​$. 
 - Learning rate of $0.1$ which is divided by $10$ at 32k and 48k iterations, and training is terminated at 64k iterations
 - 110 layer network achieved $6.43$% error, which is state of the art
 - Noticed that deeper ResNets have a smaller magnitute of responses, where a response is the standard deviation of layer responses for each layer (i.e. the responses in layers of the ResNets generally have lower standard deviations compared to plain networks)
