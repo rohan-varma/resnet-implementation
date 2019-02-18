@@ -3,10 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-debug = False
+debug = True
 
-def conv_3x3(in_channels, out_channels, pad=1):
-    return nn.Conv2d(in_channels, out_channels, 3, padding=pad)
+# TODO stride=2 is used in the paper but this is causing shape issues right now :(
+def conv_3x3(in_channels, out_channels, pad=1, stride=1):
+    return nn.Conv2d(in_channels, out_channels, 3, stride=stride, padding=pad)
 
 
 class ResidualBlock(nn.Module):
@@ -24,21 +25,21 @@ class ResidualBlock(nn.Module):
         self.conv2 = conv_3x3(in_channels, out_channels)
         self.bn2 = nn.BatchNorm2d(num_features=out_channels)
 
+        
     def forward(self, x):
         identity = x
-        if debug: print(x.shape)
         x = self.conv1(x)
-        # x = self.bn1(x)
+        x = self.bn1(x)
         x = F.relu(x)
-        if debug: print('After conv x.shape is {}'.format(x.shape))
         x = self.conv2(x)
-        # x = self.bn2(x)
+        x = self.bn2(x)
+        # The paper said that identity shortcuts are used in all cases, 
+        # so in cases of shape mismatch I pad to align dimensions, which introduces no new parameters.
         if x.shape != identity.shape:
-            if debug: print(f'Shape mismatch - x: {x.shape}, original identity: {identity.shape}')
             shape_diff = abs((sum(identity.shape) - sum(x.shape)))
-            identity = F.pad(identity, pad=(0,0,0,0,shape_diff//2,shape_diff//2)) # TODO - instead of 8, compute difference in dimensionality and pad based on that (half each), this only currently works if the dim is 16. Also fix the docs on https://pytorch.org/docs/master/_modules/torch/nn/functional.html#pad!!
-        if debug: print(f': {x.shape}, {identity.shape}')
-        return F.relu(identity + x)
+            identity = F.pad(identity, pad=(0,0,0,0,shape_diff//2,shape_diff//2))
+        x = F.relu(identity + x)
+        return x
 
     def __repr__(self):
         return f'Residual block with in_channels {self.in_channels} and out channels {self.out_channels}'
@@ -59,14 +60,10 @@ class Resnet(nn.Module):
             block = ResidualBlock(cur_feature_map_size if not changed else cur_feature_map_size//2, cur_feature_map_size)
             changed = False
             self.residual_blocks.append(block)
-        for b in self.residual_blocks:
-            if debug: print(b)
 
-        self.linear = nn.Linear(65536, 10)
-
+        self.linear = nn.Linear(16384, 10)
         self.conv1 = conv_3x3(3, 16)
-        # self.conv2 = conv_3x3(32, 32)
-        # self.first_block = ResidualBlock(32, 32)
+        self.pool = nn.AvgPool2d(2, stride=2)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -74,12 +71,11 @@ class Resnet(nn.Module):
             x = block(x)
         # x = self.first_block(x)
         # flatten the multidimensional input to a single matix for input into the FC layer
+        x = self.pool(x) # only difference is this pool
         x = x.view(x.shape[0], -1)
-        if debug: print('Shape before FC layer: {}'.format(x.shape))
         x = self.linear(x)
         return x
 
 
-
-
-
+if __name__ == '__main__':
+    resnet = Resnet()
